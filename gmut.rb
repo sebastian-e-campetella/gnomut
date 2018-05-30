@@ -2,76 +2,192 @@ require 'byebug'
 require "test/unit"
 
 class Mutant
+  MUTANT_LENGHT = 4
+
   def check_dna_string_size(pos,offset,mutation_count)
-    return (offset - pos >= 4) ? (mutation_count + 1) : mutation_count
+    return ((offset - pos).abs >= MUTANT_LENGHT) ? (mutation_count + 1) : mutation_count
   end
 
-  def isMutant(dna)
+  def check_row(dna_array,dna_size)
+      max_offset_row = 0
+      mutation_row = 0
+      offset_row = 0
+      while max_offset_row < dna_size  do
+        row = offset_row
+        while (offset_row < dna_size) && dna_array[row] == dna_array[offset_row]  do
+          offset_row += 1
+        end
+        mutation_row = check_dna_string_size(row,offset_row,mutation_row)
+        row = offset_row
+        max_offset_row += offset_row
+      end
+      return mutation_row
+  end
+
+
+  def check_col(dna_array,dna_size)
+    max_offset_col = 0
+    mutation_col = 0
+    offset_col = 0
+    while max_offset_col < dna_size  do
+      col = offset_col
+      while (offset_col < dna_size) && dna_array[col] == dna_array[offset_col]  do
+        offset_col += 1
+      end
+      mutation_col = check_dna_string_size(col,offset_col,mutation_col)
+      max_offset_col += offset_col
+    end
+    return mutation_col
+  end
+
+
+  def check_positive_diag(dna_array,dna_size)
+      iterations = dna_size - MUTANT_LENGHT
+      mutation_dd = 0
+      # by rows
+      offset_dr = 0
+      offset_dc = 0
+
+      for r in 1..iterations do
+        while dna_size > offset_dr &&  dna_size > offset_dc do
+          row = offset_dr 
+          col = offset_dc
+          while dna_size > offset_dr &&  dna_size > offset_dc && dna_array[row][col] == dna_array[offset_dr][offset_dc] do
+            offset_dr += 1
+            offset_dc += 1
+          end
+          mutation_dd = check_dna_string_size(row, offset_dr,mutation_dd)
+        end
+      end
+
+      # by cols
+      offset_dr = 1
+      offset_dc = 0
+      for r in 1..iterations do
+        while dna_size > offset_dr &&  dna_size > offset_dc do 
+          row = offset_dr
+          col = offset_dc
+          while dna_size > offset_dr &&  dna_size > offset_dc && dna_array[row][col] == dna_array[offset_dr][offset_dc] do
+            offset_dr += 1
+            offset_dc += 1
+          end
+          mutation_dd = check_dna_string_size(r, offset_dr,mutation_dd)
+        end
+      end
+
+      # central diag   
+      offset_dr = 0
+      offset_dc = 0
+      while dna_size > offset_dr &&  dna_size > offset_dc do 
+        row = offset_dr
+        col = offset_dc
+        while dna_size > offset_dr &&  dna_size > offset_dc && dna_array[row][col] == dna_array[offset_dr][offset_dc] do
+          offset_dr += 1
+          offset_dc += 1
+        end
+        mutation_dd = check_dna_string_size(row, offset_dr,mutation_dd)
+      end
+
+      return mutation_dd
+  end
+
+
+  def check_negative_diag(dna_array,dna_size)
+      iterations = dna_size - MUTANT_LENGHT
+      mutation_dd = 0
+      # by rows
+      for r in 1..iterations do
+        row = 0
+        offset_dr = 0
+        offset_dc = dna_size-1
+        col = offset_dc-r
+        while dna_size > offset_dr && offset_dc > 0 do
+          while dna_size > offset_dr && offset_dc > 0 && dna_array[row][col] == dna_array[offset_dr][offset_dc] do
+            offset_dr += 1
+            offset_dc -= 1
+          end
+          mutation_dd = check_dna_string_size(row, offset_dr,mutation_dd)
+          col = offset_dc
+          row = offset_dr
+        end
+      end
+
+      # by cols
+      offset_dc = dna_size-1
+      offset_dr = 0
+      row = 0
+      for r in 1..iterations do
+        col = offset_dc - r
+        while dna_size > offset_dr && offset_dc > 0 do
+          while dna_size > offset_dr && offset_dc > 0 && dna_array[row][col] == dna_array[offset_dr][offset_dc] do
+            offset_dr += 1
+            offset_dc -= 1
+          end
+          mutation_dd = check_dna_string_size(row, offset_dr,mutation_dd)
+          row = offset_dr
+          col = offset_dc
+        end
+      end
+
+      # central diag   
+      offset_dr = 0
+      offset_dc = dna_size-1
+      row = 0
+      col = dna_size-1
+
+      while dna_size > offset_dr &&  offset_dc > 0 do
+        while dna_size > offset_dr &&  offset_dc > 0 && dna_array[row][col] == dna_array[offset_dr][offset_dc] do
+          offset_dr += 1
+          offset_dc -= 1
+        end
+        mutation_dd = check_dna_string_size(row, offset_dr,mutation_dd)
+        row = offset_dr
+        col = offset_dc
+      end
+      return mutation_dd
+  end
+
+  def isMutantOptimized(dna)
     return "DNA is't array" if !dna.is_a?(Array)
     return "Invalid: array all size are not equal" if dna.map{|d| d.size }.uniq.size > 1
     return "Invalid: array is't nxn" if dna.first.size != dna.size
     dna_array = dna.map{|l| l.split('')}
-    offset_x = 0
-    offset_y = 0
-    max_offset_x = 0
-    max_offset_y = 0
-    max_offset_dd = 0
-    x = 0
-    y = 0
-    dna_size = dna_array.size
     mutation_count = 0
+    mutation_row = 0
+    mutation_col = 0
+    mutation_dd = 0
+    mutation_dc = 0
 
-    for i in 0..dna_size-1 do
+    dna_size = dna_array.size
 
-      while max_offset_x < dna_size && max_offset_y < dna_size do
 
-        max_offset_x = offset_x
-        max_offset_y = offset_y
-        max_offset_dd = offset_dd
+    for row in 0..dna_size-1 do
+      mutation_row += check_row(dna_array[row],dna_size)
+      mutation_col += check_col(dna_array.map{|d| d[row]},dna_size)
 
-        # x match
-        while dna_array[x][y] == dna_array[offset_x][y] && (x + offset_x < dna_size) do
-          offset_x += 1
-        end
-        mutation_count = check_dna_string_size(x,offset_x,mutation_count)
-      
-        while (dna_array[x][y] == dna_array[x][offset_y]) && (y + offset_y < dna_size) do
-          offset_y += 1
-          puts "#{offset_y}"
-        end
-        mutation_count = check_dna_string_size(y,offset_y,mutation_count)
-
-        offset_dd = x
-        while ((x + offset_dd < dna_size) && (y + offset_dd < dna_size)) && (dna_array[x][y] == dna_array[offset_dd][offset_dd]) do
-          offset_dd += 1
-          puts "#{offset_dd}"
-        end
-        mutation_count = check_dna_string_size(x,offset_dd,mutation_count)
-
-        offset_di = x
-        offset_dd = y
-        while (dna_array[x][y] == dna_array[offset_dd][offset_di]) && (x - offset_di > dna_size) && (y - offset_dd > dna_size) do
-          offset_di -= 1
-          offset_dd += 1
-        end
-        mutation_count = check_dna_string_size(x,offset_di,mutation_count)
-      end
     end
+    mutation_dd = check_positive_diag(dna_array,dna_size)
+    mutation_dc = check_negative_diag(dna_array,dna_size)
+    mutation_count = mutation_dd + mutation_row + mutation_col + mutation_dc
     return (mutation_count > 2) ? true : false
   end
 end
 
+#@mutant = Mutant.new
+#@mutant.isMutantOptimized(["aaaaa","aaaaa","aaaaa","aaaaa","aaaaa"])
+#@mutant.isMutantOptimized(["aaaaa","aaaaa","aaaaa","aaaaa","aaaaa"])
 class MutantTest < Test::Unit::TestCase
   def setup
     @mutant =  Mutant.new()
   end
 
   test "not mutant " do
-    assertEqual(false,isMutant(["aaaaa","ccaaa","cdaav","ccaaq","ccaaa"]))
-  end
-
-  test "pop an object at the inmutable stack" do
-    pass
+    assert_equal(true, @mutant.isMutantOptimized(["aaaaa","ccaaa","cdaav","ccaaq","ccaaa"]))
+    assert_equal(true,  @mutant.isMutantOptimized(["taaaa","tcaaa","tdaav","tcaaq","tcaaa"]))
+    assert_equal(true,  @mutant.isMutantOptimized(["aaaaa","aaaaa","aaaaa","aaaaa","aaaaa"]))
+    assert_equal(true,  @mutant.isMutantOptimized(["aaaaa","asdds","aaaaa","aaaaa","aaaaa"]))
+    assert_equal(true,  @mutant.isMutantOptimized(["aaaaa","asdds","aaaaa","aadaa","aaaaa"]))
+    assert_equal(false, @mutant.isMutantOptimized(["adrax","asdds","avfrt","aadaa","aantr"]))
   end
 
 end
