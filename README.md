@@ -2,7 +2,7 @@
 
 Test dna mutant 
 
- ## PublicTaskApi is an API Restful web application with attributes and basic methods:
+ ## gnomut is an API Restful web application with attributes and basic methods:
 
   ## Attributes
     - dna type array of string
