@@ -20,7 +20,7 @@ class Magneto
 
   def self.ratio
     total = self.count
-    mutant = self.where(mutant: true).count
+    mutant = self.where(is_mutant: true).count
     human = total - mutant
     return {count_mutant_dna: mutant, count_human_dna: human ,ratio: (mutant/total.to_f).round(2)}
   end

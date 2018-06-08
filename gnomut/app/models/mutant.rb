@@ -18,6 +18,7 @@ class Mutant
   end
 
   def isMutantOptimized(dna)
+    self.errors.add(:dna, "invalid_format" ,"Invalid: array is't comparable") if dna.size < MUTANT_LENGHT
     self.errors.add(:dna, "invalid_format" ,"DNA is't array") if !dna.is_a?(Array)
     self.errors.add(:dna, "invalid_format","Invalid: array all size are not equal") if dna.map{|d| d.size }.uniq.size > 1
     self.errors.add(:dna, "invalid_format" ,"Invalid: array is't nxn") if dna.first.size != dna.size

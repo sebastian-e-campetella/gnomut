@@ -2,7 +2,6 @@ ENV['RAILS_ENV'] ||= 'test'
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 require 'simplecov'
-require File.expand_path('../../app/models', __FILE__)
 
 SimpleCov.minimum_coverage_by_file 80
 

@@ -39,7 +39,10 @@ group :development, :test do
   gem 'capybara', '~> 2.13'
   gem 'selenium-webdriver'
   gem 'test-unit'
+  gem 'rspec-rails'
   gem 'rails-controller-testing'
+  gem 'database_cleaner', :github => 'bmabey/database_cleaner'
+  gem 'factory_bot_rails', :require => false
 end
 
 group :development do

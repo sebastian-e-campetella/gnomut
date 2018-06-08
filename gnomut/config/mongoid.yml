@@ -28,11 +28,11 @@ production:
     default:
       database: yve_production
       hosts:
-        - localhost:27017
+        - 35.232.148.224:27017
       options:
         # The name of the user for authentication.
-        user: admin
+        user: root
         # The password of the user for authentication.
-        password: admin1234
+        password: BtDwU7y3ZS41
         # The database or source to authenticate the user against. (default: admin)
         auth_source: admin
